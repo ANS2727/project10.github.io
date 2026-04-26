@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Подбор рецептов</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #6c63ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #574fd6;
+        }
+
+        .recipe {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .percent {
+            color: green;
+            font-weight: bold;
+        }
+
+        .missing {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🍽 Подбор рецептов</h1>
+
+    <form method="post">
+        <label>Введите ингредиенты:</label>
+        <input type="text" name="ingredients" placeholder="например: яйцо, молоко, сыр">
+
+        <label>Режим:</label>
+        <select name="mode">
+            <option value="normal">Обычный</option>
+            <option value="strict">Строгий</option>
+        </select>
+
+        <button type="submit">🔍 Найти рецепты</button>
+    </form>
+
+    {% if results %}
+        <h2>Результаты:</h2>
+
+        {% for recipe in results %}
+            <div class="recipe">
+                <h3>{{ recipe.name }}</h3>
+
+                {% if recipe.percent %}
+                    <p class="percent">Совпадение: {{ recipe.percent }}%</p>
+                {% endif %}
+
+                {% if recipe.missing %}
+                    <p class="missing">Не хватает: {{ recipe.missing | join(", ") }}</p>
+                {% endif %}
+
+                <p>{{ recipe.instructions }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+</body>
+</html>
