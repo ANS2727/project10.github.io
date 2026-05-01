@@ -91,6 +91,16 @@
 
         <div style="margin-top: 40px;">
             {% for review in reviews %}
+                <div style="margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: right;">
+                    <form action="/delete-review/{{ loop.index0 }}" method="POST" style="display: inline-block;">
+                        <input type="password" name="admin_pass" placeholder="Пароль" 
+                            style="width: 80px; padding: 5px; font-size: 12px; margin: 0; border: 1px solid #ccc;">
+                        <button type="submit" 
+                                style="width: auto; padding: 5px 10px; background: #ff4757; font-size: 12px; margin: 0; display: inline-block;">
+                            Удалить
+                        </button>
+                    </form>
+                </div>
                 <div class="review-card">
                     <div class="review-header">
                         <span class="review-name">{{ review.name }}</span>
