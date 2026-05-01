@@ -7,45 +7,29 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
             margin: 0;
             padding: 0;
-            background-color: #e5e7eb; 
-        }
-
-        .side-image {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 300px; 
-            height: auto;
-            z-index: -1; 
-            opacity: 0.8; 
-            pointer-events: none; 
-        }
-
-        .left-img {
-            left: 20px;
-        }
-
-        .right-img {
-            right: 20px;
-        }
-
-        @media (max-width: 1400px) {
-            .side-image {
-                display: none;
-            }
+            /* Устанавливаем фоновую картинку с едой */
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Фон не будет прокручиваться */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
-            width: 700px;
-            margin: 50px auto;
-            background: white;
+            width: 100%;
+            max-width: 700px;
+            margin: 40px 20px;
+            background: rgba(255, 255, 255, 0.95); /* Полупрозрачный белый фон для формы */
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            position: relative; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px); /* Легкое размытие под контейнером */
         }
 
         h1 {
@@ -53,6 +37,13 @@
             color: #2d3436;
             font-size: 2.5em;
             margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
         }
 
         input[type="text"] {
@@ -63,6 +54,7 @@
             font-size: 16px;
             outline: none;
             transition: 0.3s;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus {
@@ -72,14 +64,14 @@
         select {
             width: 100%;
             padding: 12px;
-            margin-top: 10px;
+            margin-bottom: 20px;
             border-radius: 10px;
             border: 2px solid #dfe6e9;
             background-color: white;
+            font-size: 16px;
         }
 
         button {
-            margin-top: 20px;
             width: 100%;
             padding: 15px;
             border: none;
@@ -98,12 +90,16 @@
             box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
         }
 
+        .results-area {
+            margin-top: 30px;
+        }
+
         .recipe {
             background: #fff;
             padding: 20px;
-            margin-top: 25px;
+            margin-bottom: 20px;
             border-radius: 15px;
-            border: 1px solid #eee;
+            border-left: 5px solid #6c63ff;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
@@ -119,63 +115,61 @@
 
         .missing {
             color: #e74c3c;
-            margin-top: 10px;
+            margin: 10px 0;
             padding: 10px;
             background: #fdf2f2;
             border-radius: 8px;
+            font-size: 0.9em;
         }
 
         .instructions {
             line-height: 1.6;
             color: #636e72;
+            font-size: 0.95em;
         }
     </style>
 </head>
 <body>
 
-    <img src="https://img.freepik.com/free-photo/top-view-raw-vegetables-white-background_23-2148188171.jpg" 
-         class="side-image left-img" alt="декор лево">
-
-    <img src="https://img.freepik.com/free-photo/cooking-ingredients-frame-top-view_23-2148188151.jpg" 
-         class="side-image right-img" alt="декор право">
-
     <div class="container">
-        <h1>👨‍🍳 Что приготовим?</h1>
+        <h1>👨‍🍳 Подбор рецептов</h1>
 
         <form method="post">
             <label>Ваши продукты:</label>
             <input type="text" name="ingredients" value="{{ user_input }}" placeholder="чеснок, паста, томаты...">
 
-            <label style="display: block; margin-top: 20px;">Режим подбора:</label>
+            <label style="margin-top: 20px;">Режим подбора:</label>
             <select name="mode">
-                <option value="flexible" {% if mode == 'flexible' %}selected{% endif %}>Найти любые совпадения</option>
-                <option value="strict" {% if mode == 'strict' %}selected{% endif %}>Только из моих продуктов</option>
+                <option value="flexible" {% if mode == 'flexible' %}selected{% endif %}>Обычный (Найти любые совпадения)</option>
+                <option value="strict" {% if mode == 'strict' %}selected{% endif %}>Строгий (Только из моих продуктов)</option>
             </select>
 
             <button type="submit">Найти лучшие рецепты</button>
         </form>
 
-        {% if results %}
-            <h2 style="margin-top: 40px;">Мы нашли для вас:</h2>
-            {% for recipe in results %}
-                <div class="recipe">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin: 0;">{{ recipe.name }}</h3>
-                        <span class="percent">{{ recipe.percent }}% совпало</span>
-                    </div>
-
-                    {% if recipe.missing %}
-                        <div class="missing">
-                            <strong>Докупить:</strong> {{ recipe.missing|join(', ') }}
+        <div class="results-area">
+            {% if results %}
+                <h2 style="color: #2d3436;">Мы нашли для вас:</h2>
+                {% for recipe in results %}
+                    <div class="recipe">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0;">{{ recipe.name }}</h3>
+                            <span class="percent">{{ recipe.percent }}%</span>
                         </div>
-                    {% endif %}
 
-                    <p class="instructions"><strong>Как готовить:</strong><br>{{ recipe.instructions }}</p>
-                </div>
-            {% endfor %}
-        {% elif request.method == 'POST' %}
-            <p style="text-align: center; margin-top: 30px; color: #b2bec3;">Ничего не нашлось, попробуйте изменить список продуктов.</p>
-        {% endif %}
+                        {% if recipe.missing %}
+                            <div class="missing">
+                                <strong>Докупить:</strong> {{ recipe.missing|join(', ') }}
+                            </div>
+                        {% endif %}
+
+                        <p class="instructions"><strong>Как готовить:</strong><br>{{ recipe.instructions }}</p>
+                    </div>
+                {% endfor %}
+            {% elif request.method == 'POST' %}
+                <p style="text-align: center; color: #b2bec3;">Ничего не нашлось, попробуйте изменить список продуктов.</p>
+            {% endif %}
+        </div>
     </div>
 
 </body>
