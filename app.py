@@ -9,7 +9,7 @@ app = Flask(__name__)
 RECIPES_FILE = "recipes.json"
 REVIEWS_FILE = "reviews.json"
 
-ADMIN_PASSWORD = "admin123" 
+ADMIN_PASSWORD = "qaz123wsx321" 
 
 BANNED_WORDS = [
       '2g1c',
@@ -666,7 +666,7 @@ def reviews_page():
 
 @app.route("/delete-review/<int:index>", methods=["POST"])
 def delete_review(index):
-    """Удаление отзыва по индексу при наличии пароля"""
+
     password = request.form.get("admin_pass")
     if password == ADMIN_PASSWORD:
         reviews = load_data(REVIEWS_FILE)
