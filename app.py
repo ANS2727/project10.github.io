@@ -1,16 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import json
 import re
 import os
+import time
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "super_secret_key_123" 
 
 RECIPES_FILE = "recipes.json"
 REVIEWS_FILE = "reviews.json"
-
-ADMIN_PASSWORD = "qaz123wsx321" 
-
+ADMIN_PASSWORD = "k2009"
 BANNED_WORDS = [
       '2g1c',
   '2 girls 1 cup',
@@ -547,97 +547,32 @@ BANNED_WORDS = [
 ]
 
 
-def load_data(file_path):
 
+def load_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
-            try:
-                return json.load(f)
-            except:
-                return []
+            try: return json.load(f)
+            except: return []
     return []
 
 def save_reviews(reviews):
-
     with open(REVIEWS_FILE, "w", encoding="utf-8") as f:
         json.dump(reviews, f, ensure_ascii=False, indent=4)
 
 def is_clean(text, banned_list):
-
-    if not text:
-        return True
-
+    if not text: return True
     original = text.lower()
-
     clean = re.sub(r'[^а-яёa-z0-9]', '', original)
-
     for word in banned_list:
         word = word.lower()
-        if word in original or word in clean:
-            return False
+        if word in original or word in clean: return False
     return True
-
-def clean_ingredient(text):
-    """Очистка ингредиента от лишней информации (веса, скобок)"""
-    return re.sub(r'\s*\(.*?\)', '', text).strip().lower()
-
-def is_match(user_ing, recipe_ing):
-    """Проверка совпадения ингредиента"""
-    u = clean_ingredient(user_ing)
-    r = clean_ingredient(recipe_ing)
-    if not u or not r:
-        return False
-
-    return u in r or r in u or u.split()[0] == r.split()[0]
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    recipes = load_data(RECIPES_FILE)
-    results = []
-    user_input = ""
-    mode = "flexible"
 
-    if request.method == "POST":
-        user_input = request.form.get("ingredients", "")
-        mode = request.form.get("mode", "flexible")
-
-        user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()]
-
-        if user_ingredients:
-            for recipe in recipes:
-                recipe_ings = recipe.get("ingredients", [])
-
-                matches = []
-                missing = []
-                for r_ing in recipe_ings:
-                    found = any(is_match(u_ing, r_ing) for u_ing in user_ingredients)
-                    if found:
-                        matches.append(r_ing)
-                    else:
-                        missing.append(r_ing)
-
-                if mode == "strict":
-                    if not missing:
-                        results.append({
-                            "name": recipe["name"],
-                            "percent": 100,
-                            "missing": [],
-                            "instructions": recipe["instructions"]
-                        })
-                else:
-                    if matches: 
-                        percent = int(len(matches) / len(recipe_ings) * 100)
-                        results.append({
-                            "name": recipe["name"],
-                            "percent": percent,
-                            "missing": missing,
-                            "instructions": recipe["instructions"]
-                        })
-            results.sort(key=lambda x: x["percent"], reverse=True)
-
-    return render_template("index.html", results=results, user_input=user_input, mode=mode)
-
+    return render_template("index.html", results=[], user_input="", mode="flexible")
 
 @app.route("/reviews", methods=["GET", "POST"])
 def reviews_page():
@@ -647,27 +582,39 @@ def reviews_page():
     if request.method == "POST":
         name = request.form.get("name", "Anonymous").strip()
         text = request.form.get("text", "").strip()
+        
+        if request.form.get("website"):
+            return "Bot detected!", 403
 
-        if not is_clean(text, BANNED_WORDS) or not is_clean(name, BANNED_WORDS):
-            error = "Your comment contains prohibited words! / Запрещенные слова!"
+        last_post_time = session.get('last_post_time')
+        current_time = time.time()
+        if last_post_time and (current_time - last_post_time < 60):
+            error = "Too fast! Wait a minute. / Слишком часто! Подождите минуту."
+        
+        elif all_reviews and text == all_reviews[0]['text']:
+            error = "Duplicate review detected! / Такой отзыв уже оставлен."
+
+        elif not is_clean(text, BANNED_WORDS) or not is_clean(name, BANNED_WORDS):
+            error = "Prohibited words detected! / Запрещенные слова!"
+        
         elif len(text) < 3:
             error = "Review is too short! / Отзыв слишком короткий!"
+            
         else:
             new_review = {
                 "name": name if name else "Anonymous",
                 "text": text,
                 "date": datetime.now().strftime("%d.%m.%Y %H:%M")
             }
-            all_reviews.insert(0, new_review) 
+            all_reviews.insert(0, new_review)
             save_reviews(all_reviews)
+            session['last_post_time'] = current_time 
             return redirect(url_for("reviews_page"))
 
     return render_template("reviews.html", reviews=all_reviews, error=error)
 
-
 @app.route("/delete-review/<int:index>", methods=["POST"])
 def delete_review(index):
-
     password = request.form.get("admin_pass")
     if password == ADMIN_PASSWORD:
         reviews = load_data(REVIEWS_FILE)
@@ -675,7 +622,6 @@ def delete_review(index):
             reviews.pop(index)
             save_reviews(reviews)
     return redirect(url_for("reviews_page"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
