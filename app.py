@@ -582,7 +582,7 @@ def index():
     recipes = load_data(RECIPES_FILE)
     results = []
     user_input = ""
-    mode = "ingredients" 
+    mode = "ingredients"
 
     if request.method == "POST":
         user_input = request.form.get("ingredients", "").strip()
@@ -594,12 +594,11 @@ def index():
                     if user_input.lower() in recipe["name"].lower():
                         results.append({
                             "name": recipe["name"],
-                            "percent": 100, 
+                            "percent": 100,
                             "missing": [],
                             "instructions": recipe["instructions"]
                         })
             else:
- 
                 user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()][cite: 1]
                 for recipe in recipes:
                     recipe_ings = recipe.get("ingredients", [])
@@ -614,7 +613,6 @@ def index():
                             "missing": missing,
                             "instructions": recipe["instructions"]
                         })
-                
                 results.sort(key=lambda x: x["percent"], reverse=True)[cite: 1]
 
     return render_template("index.html", results=results, user_input=user_input, mode=mode)

@@ -138,14 +138,37 @@
         <h1>Подбор рецептов</h1>
 
         <form method="post">
-            <label>Ваши продукты:</label>
-            <input type="text" name="ingredients" value="{{ user_input }}" placeholder="чеснок, паста, томаты...">
-
+            <label id="input-label">Ваши продукты:</label>
+            <input type="text" id="search-input" name="ingredients" value="{{ user_input }}" placeholder="чеснок, паста, томаты...">
+        
             <label style="margin-top: 20px;">Как искать?</label>
-            <select name="mode">
+            <select name="mode" id="mode-select">
                 <option value="ingredients" {% if mode == 'ingredients' %}selected{% endif %}>По списку продуктов</option>
                 <option value="name" {% if mode == 'name' %}selected{% endif %}>По названию блюда</option>
             </select>
+        
+            <button type="submit">Найти</button>
+        </form>
+        
+        <script>
+            const modeSelect = document.getElementById('mode-select');
+            const searchInput = document.getElementById('search-input');
+            const inputLabel = document.getElementById('input-label');
+        
+            function updateUI() {
+                if (modeSelect.value === 'name') {
+                    inputLabel.innerText = "Название блюда:";
+                    searchInput.placeholder = "Например: Борщ или Паста Карбонара";
+                } else {
+                    inputLabel.innerText = "Ваши продукты:";
+                    searchInput.placeholder = "чеснок, паста, томаты...";
+                }
+            }
+        
+            modeSelect.addEventListener('change', updateUI);
+            
+            updateUI();
+        </script>
 
             <button type="submit">Найти лучшие рецепты</button>
         </form>
