@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Подбор рецептов</title>
-
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-         
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                         url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed; 
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -25,17 +23,27 @@
             width: 100%;
             max-width: 700px;
             margin: 40px 20px;
-            background: rgba(255, 255, 255, 0.95); 
+            background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            backdrop-filter: blur(5px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .nav-link a {
+            color: #6c63ff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
         }
 
         h1 {
             text-align: center;
             color: #2d3436;
-            font-size: 2.5em;
             margin-bottom: 30px;
         }
 
@@ -53,8 +61,8 @@
             border-radius: 12px;
             font-size: 16px;
             outline: none;
-            transition: 0.3s;
             box-sizing: border-box;
+            transition: 0.3s;
         }
 
         input[type="text"]:focus {
@@ -69,9 +77,10 @@
             border: 2px solid #dfe6e9;
             background-color: white;
             font-size: 16px;
+            cursor: pointer;
         }
 
-        button {
+        .btn-submit {
             width: 100%;
             padding: 15px;
             border: none;
@@ -85,117 +94,99 @@
             box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
         }
 
-        button:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
-        }
-
-        .results-area {
-            margin-top: 30px;
         }
 
         .recipe {
             background: #fff;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-top: 20px;
             border-radius: 15px;
             border-left: 5px solid #6c63ff;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .percent {
-            display: inline-block;
             background: #e1f5fe;
             color: #0288d1;
             padding: 5px 10px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.9em;
         }
 
         .missing {
             color: #e74c3c;
-            margin: 10px 0;
-            padding: 10px;
             background: #fdf2f2;
+            padding: 10px;
             border-radius: 8px;
+            margin: 10px 0;
             font-size: 0.9em;
-        }
-
-        .instructions {
-            line-height: 1.6;
-            color: #636e72;
-            font-size: 0.95em;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div style="text-align: right; margin-bottom: 10px;">
-            <a href="/reviews" style="color: #6c63ff; text-decoration: none; font-weight: bold;">💬 Отзывы</a>
+        <div class="nav-link">
+            <a href="/reviews">💬 Отзывы</a>
         </div>
-        <h1>Подбор рецептов</h1>
+        
+        <h1>👨‍🍳 Подбор рецептов</h1>
 
         <form method="post">
             <label id="input-label">Ваши продукты:</label>
             <input type="text" id="search-input" name="ingredients" value="{{ user_input }}" placeholder="чеснок, паста, томаты...">
-        
+
             <label style="margin-top: 20px;">Как искать?</label>
             <select name="mode" id="mode-select">
                 <option value="ingredients" {% if mode == 'ingredients' %}selected{% endif %}>По списку продуктов</option>
                 <option value="name" {% if mode == 'name' %}selected{% endif %}>По названию блюда</option>
             </select>
-        
-            <button type="submit">Найти</button>
-        </form>
-        
-        <script>
-            const modeSelect = document.getElementById('mode-select');
-            const searchInput = document.getElementById('search-input');
-            const inputLabel = document.getElementById('input-label');
-        
-            function updateUI() {
-                if (modeSelect.value === 'name') {
-                    inputLabel.innerText = "Название блюда:";
-                    searchInput.placeholder = "Например: Борщ или Паста Карбонара";
-                } else {
-                    inputLabel.innerText = "Ваши продукты:";
-                    searchInput.placeholder = "чеснок, паста, томаты...";
-                }
-            }
-        
-            modeSelect.addEventListener('change', updateUI);
-            
-            updateUI();
-        </script>
 
-            <button type="submit">Найти лучшие рецепты</button>
+            <button type="submit" class="btn-submit">Найти рецепты</button>
         </form>
+
         <div class="results-area">
             {% if results %}
-                <h2 style="color: #2d3436;">Мы нашли для вас:</h2>
+                <h2 style="margin-top: 30px;">Результаты:</h2>
                 {% for recipe in results %}
                     <div class="recipe">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 style="margin: 0;">{{ recipe.name }}</h3>
                             <span class="percent">{{ recipe.percent }}%</span>
                         </div>
-
                         {% if recipe.missing %}
                             <div class="missing">
                                 <strong>Докупить:</strong> {{ recipe.missing|join(', ') }}
                             </div>
                         {% endif %}
-
-                        <p class="instructions"><strong>Как готовить:</strong><br>{{ recipe.instructions }}</p>
+                        <p><strong>Инструкция:</strong><br>{{ recipe.instructions }}</p>
                     </div>
                 {% endfor %}
             {% elif request.method == 'POST' %}
-                <p style="text-align: center; color: #b2bec3;">Ничего не нашлось, попробуйте изменить список продуктов.</p>
+                <p style="text-align: center; margin-top: 30px; color: #b2bec3;">Ничего не нашлось, попробуйте другой запрос.</p>
             {% endif %}
         </div>
     </div>
+    <script>
+        const modeSelect = document.getElementById('mode-select');
+        const searchInput = document.getElementById('search-input');
+        const inputLabel = document.getElementById('input-label');
 
+        function updateUI() {
+            if (modeSelect.value === 'name') {
+                inputLabel.innerText = "Название блюда:";
+                searchInput.placeholder = "Например: Борщ или Паста Карбонара";
+            } else {
+                inputLabel.innerText = "Ваши продукты:";
+                searchInput.placeholder = "чеснок, паста, томаты...";
+            }
+        }
+
+        modeSelect.addEventListener('change', updateUI);
+        updateUI();
+    </script>
 </body>
 </html>
