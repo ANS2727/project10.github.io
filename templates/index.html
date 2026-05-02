@@ -141,10 +141,10 @@
             <label>Ваши продукты:</label>
             <input type="text" name="ingredients" value="{{ user_input }}" placeholder="чеснок, паста, томаты...">
 
-            <label style="margin-top: 20px;">Режим подбора:</label>
+            <label style="margin-top: 20px;">Как искать?</label>
             <select name="mode">
-                <option value="flexible" {% if mode == 'flexible' %}selected{% endif %}>Обычный (Найти любые совпадения)</option>
-                <option value="strict" {% if mode == 'strict' %}selected{% endif %}>Строгий (Только из моих продуктов)</option>
+                <option value="ingredients" {% if mode == 'ingredients' %}selected{% endif %}>По списку продуктов</option>
+                <option value="name" {% if mode == 'name' %}selected{% endif %}>По названию блюда</option>
             </select>
 
             <button type="submit">Найти лучшие рецепты</button>

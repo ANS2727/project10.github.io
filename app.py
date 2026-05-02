@@ -6,13 +6,11 @@ import time
 from datetime import datetime
 
 app = Flask(__name__)
-
 app.secret_key = "super_secret_key_123" 
 
 RECIPES_FILE = "recipes.json"
 REVIEWS_FILE = "reviews.json"
 ADMIN_PASSWORD = "k2009" 
-
 BANNED_WORDS = [
       '2g1c',
   '2 girls 1 cup',
@@ -552,10 +550,8 @@ BANNED_WORDS = [
 def load_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
-            try:
-                return json.load(f)
-            except:
-                return []
+            try: return json.load(f)
+            except: return []
     return []
 
 def save_reviews(reviews):
@@ -563,115 +559,91 @@ def save_reviews(reviews):
         json.dump(reviews, f, ensure_ascii=False, indent=4)
 
 def is_clean(text, banned_list):
-
     if not text: return True
     original = text.lower()
     clean = re.sub(r'[^а-яёa-z0-9]', '', original)
     for word in banned_list:
         word = word.lower()
-        if word in original or word in clean:
-            return False
+        if word in original or word in clean: return False
     return True
 
 def clean_ingredient(text):
-
-    return re.sub(r'\s*\(.*?\)', '', text).strip().lower()
+    return re.sub(r'\s*\(.*?\)', '', text).strip().lower()[cite: 1]
 
 def is_match(user_ing, recipe_ing):
-
-    u = clean_ingredient(user_ing)
-    r = clean_ingredient(recipe_ing)
+    u = clean_ingredient(user_ing)[cite: 1]
+    r = clean_ingredient(recipe_ing)[cite: 1]
     if not u or not r: return False
-    return u in r or r in u
+    return u in r or r in u[cite: 1]
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     recipes = load_data(RECIPES_FILE)
     results = []
     user_input = ""
-    mode = "flexible"
+    mode = "ingredients" 
 
     if request.method == "POST":
-        user_input = request.form.get("ingredients", "")
-        mode = request.form.get("mode", "flexible")
-
-        user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()]
-
-        if user_ingredients:
-            for recipe in recipes:
-                recipe_ings = recipe.get("ingredients", [])
-
-                matches = []
-                missing = []
-                for r_ing in recipe_ings:
-                    found = any(is_match(u_ing, r_ing) for u_ing in user_ingredients)
-                    if found:
-                        matches.append(r_ing)
-                    else:
-                        missing.append(r_ing)
-
-                if mode == "strict":
-                    if not missing:
+        user_input = request.form.get("ingredients", "").strip()
+        mode = request.form.get("mode", "ingredients")
+        
+        if user_input:
+            if mode == "name":
+                for recipe in recipes:
+                    if user_input.lower() in recipe["name"].lower():
                         results.append({
                             "name": recipe["name"],
-                            "percent": 100,
+                            "percent": 100, 
                             "missing": [],
                             "instructions": recipe["instructions"]
                         })
-                else:
+            else:
+ 
+                user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()][cite: 1]
+                for recipe in recipes:
+                    recipe_ings = recipe.get("ingredients", [])
+                    matches = [ri for ri in recipe_ings if any(is_match(ui, ri) for ui in user_ingredients)][cite: 1]
+                    
                     if matches:
-                        percent = int(len(matches) / len(recipe_ings) * 100)
+                        percent = int(len(matches) / len(recipe_ings) * 100)[cite: 1]
+                        missing = [ri for ri in recipe_ings if ri not in matches][cite: 1]
                         results.append({
                             "name": recipe["name"],
                             "percent": percent,
                             "missing": missing,
                             "instructions": recipe["instructions"]
                         })
-            
-            results.sort(key=lambda x: x["percent"], reverse=True)
+                
+                results.sort(key=lambda x: x["percent"], reverse=True)[cite: 1]
 
     return render_template("index.html", results=results, user_input=user_input, mode=mode)
-
 
 @app.route("/reviews", methods=["GET", "POST"])
 def reviews_page():
     all_reviews = load_data(REVIEWS_FILE)
     error = None
-
     if request.method == "POST":
         name = request.form.get("name", "Anonymous").strip()
         text = request.form.get("text", "").strip()
-        
-        if request.form.get("website"):
-            return "Bot detected!", 403
+        if request.form.get("website"): return "Bot detected!", 403
         last_post_time = session.get('last_post_time')
         current_time = time.time()
-        
         if last_post_time and (current_time - last_post_time < 60):
-            error = "Wait a minute before posting again! / Подождите минуту."
-
+            error = "Wait a minute! / Подождите минуту."
         elif all_reviews and text == all_reviews[0]['text']:
-            error = "You already posted this! / Такой отзыв уже есть."
-
+            error = "Duplicate! / Такой отзыв уже есть."
         elif not is_clean(text, BANNED_WORDS) or not is_clean(name, BANNED_WORDS):
-            error = "Prohibited words detected! / Запрещенные слова!"
-        
+            error = "Banned words! / Запрещенные слова!"
         elif len(text) < 3:
-            error = "Text is too short. / Слишком короткий текст."
-            
+            error = "Too short. / Слишком коротко."
         else:
-            new_review = {
-                "name": name if name else "Anonymous",
-                "text": text,
-                "date": datetime.now().strftime("%d.%m.%Y %H:%M")
-            }
+            new_review = {"name": name if name else "Anonymous", "text": text, "date": datetime.now().strftime("%d.%m.%Y %H:%M")}
             all_reviews.insert(0, new_review)
             save_reviews(all_reviews)
-            session['last_post_time'] = current_time # Сохраняем время поста
+            session['last_post_time'] = current_time
             return redirect(url_for("reviews_page"))
-
     return render_template("reviews.html", reviews=all_reviews, error=error)
-
 
 @app.route("/delete-review/<int:index>", methods=["POST"])
 def delete_review(index):
@@ -682,7 +654,6 @@ def delete_review(index):
             reviews.pop(index)
             save_reviews(reviews)
     return redirect(url_for("reviews_page"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
