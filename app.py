@@ -542,7 +542,7 @@ BANNED_WORDS = [
   "хуёвый",
   "сука",
   "ёб твою мать",
-  "ёбарь"
+  "ёбарь",
     "мат1", "мат2", "реклама", "казино"     
 ]
 
@@ -568,14 +568,13 @@ def is_clean(text, banned_list):
     return True
 
 def clean_ingredient(text):
-    return re.sub(r'\s*\(.*?\)', '', text).strip().lower()[cite: 1]
+    return re.sub(r'\s*\(.*?\)', '', text).strip().lower()
 
 def is_match(user_ing, recipe_ing):
-    u = clean_ingredient(user_ing)[cite: 1]
-    r = clean_ingredient(recipe_ing)[cite: 1]
+    u = clean_ingredient(user_ing)
+    r = clean_ingredient(recipe_ing)
     if not u or not r: return False
-    return u in r or r in u[cite: 1]
-
+    return u in r or r in u
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -599,21 +598,21 @@ def index():
                             "instructions": recipe["instructions"]
                         })
             else:
-                user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()][cite: 1]
+                user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()]
                 for recipe in recipes:
                     recipe_ings = recipe.get("ingredients", [])
-                    matches = [ri for ri in recipe_ings if any(is_match(ui, ri) for ui in user_ingredients)][cite: 1]
+                    matches = [ri for ri in recipe_ings if any(is_match(ui, ri) for ui in user_ingredients)]
                     
                     if matches:
-                        percent = int(len(matches) / len(recipe_ings) * 100)[cite: 1]
-                        missing = [ri for ri in recipe_ings if ri not in matches][cite: 1]
+                        percent = int(len(matches) / len(recipe_ings) * 100)
+                        missing = [ri for ri in recipe_ings if ri not in matches]
                         results.append({
                             "name": recipe["name"],
                             "percent": percent,
                             "missing": missing,
                             "instructions": recipe["instructions"]
                         })
-                results.sort(key=lambda x: x["percent"], reverse=True)[cite: 1]
+                results.sort(key=lambda x: x["percent"], reverse=True)
 
     return render_template("index.html", results=results, user_input=user_input, mode=mode)
 
