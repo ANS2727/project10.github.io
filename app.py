@@ -621,25 +621,33 @@ def reviews_page():
     all_reviews = load_data(REVIEWS_FILE)
     error = None
     if request.method == "POST":
-        name = request.form.get("name", "Anonymous").strip()
-        text = request.form.get("text", "").strip()
+        author = request.form.get("author", "Anonymous").strip()
+        content = request.form.get("content", "").strip()
+        
         if request.form.get("website"): return "Bot detected!", 403
+        
         last_post_time = session.get('last_post_time')
         current_time = time.time()
+        
         if last_post_time and (current_time - last_post_time < 60):
-            error = "Wait a minute! / Подождите минуту."
-        elif all_reviews and text == all_reviews[0]['text']:
-            error = "Duplicate! / Такой отзыв уже есть."
-        elif not is_clean(text, BANNED_WORDS) or not is_clean(name, BANNED_WORDS):
-            error = "Banned words! / Запрещенные слова!"
-        elif len(text) < 3:
-            error = "Too short. / Слишком коротко."
+            error = "Подождите минуту перед следующим отзывом."
+        elif all_reviews and content == all_reviews[0].get('content'):
+            error = "Такой отзыв уже есть."
+        elif not is_clean(content, BANNED_WORDS) or not is_clean(author, BANNED_WORDS):
+            error = "В отзыве или имени содержатся запрещенные слова!"
+        elif len(content) < 3:
+            error = "Отзыв слишком короткий."
         else:
-            new_review = {"name": name if name else "Anonymous", "text": text, "date": datetime.now().strftime("%d.%m.%Y %H:%M")}
+            new_review = {
+                "author": author if author else "Anonymous", 
+                "content": content, 
+                "date": datetime.now().strftime("%d.%m.%Y %H:%M")
+            }
             all_reviews.insert(0, new_review)
             save_reviews(all_reviews)
             session['last_post_time'] = current_time
             return redirect(url_for("reviews_page"))
+            
     return render_template("reviews.html", reviews=all_reviews, error=error)
 
 @app.route("/delete-review/<int:index>", methods=["POST"])

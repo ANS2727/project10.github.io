@@ -137,6 +137,12 @@
         </div>
         
         <h1>💬 Отзывы пользователей</h1>
+        {% if error %}
+            <div style="background: #ff7675; color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+                ⚠️ {{ error }}
+            </div>
+        {% endif %}
+
 
         <form method="post">
             <label>Ваше имя:</label>
