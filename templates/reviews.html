@@ -2,119 +2,166 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Отзывы - Что приготовим?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы о рецептах</title>
     <style>
+
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                         url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
+            background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 600px;
-            margin: 40px 20px;
+            max-width: 700px;
+            margin: 20px;
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            backdrop-filter: blur(5px);
-        }
-
-        .nav-link { text-align: center; margin-bottom: 20px; }
-        .nav-link a { color: white; text-decoration: none; font-weight: bold; }
-
-        h1 { text-align: center; color: #2d3436; }
-
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: 2px solid #dfe6e9;
-            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
             box-sizing: border-box;
         }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 10px;
-            background: #6c63ff;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+                border-radius: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .btn-submit {
+                font-size: 16px;
+                padding: 12px;
+            }
         }
 
-        .error { color: #e74c3c; background: #fdf2f2; padding: 10px; border-radius: 8px; margin-top: 10px; }
+        .nav-link {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .nav-link a {
+            color: #6c63ff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.3s;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: #6c63ff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6c63ff, #4834d4);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
 
         .review-card {
-            background: white;
-            padding: 15px;
+            background: #fff;
+            padding: 20px;
             margin-top: 20px;
-            border-radius: 12px;
-            border-left: 5px solid #6c63ff;
+            border-radius: 15px;
+            border-left: 5px solid #00b894;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .review-header { display: flex; justify-content: space-between; color: #636e72; font-size: 0.85em; }
-        .review-name { font-weight: bold; color: #2d3436; font-size: 1.1em; }
+        .review-author {
+            font-weight: bold;
+            color: #2d3436;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .review-text {
+            color: #636e72;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
-    <div class="nav-link" style="margin-top: 20px;">
-        <a href="/">← Вернуться к поиску рецептов</a>
-    </div>
-
     <div class="container">
-        <h1>💬 Отзывы</h1>
+        <div class="nav-link">
+            <a href="/">⬅ Вернуться на главную</a>
+        </div>
+        
+        <h1>💬 Отзывы пользователей</h1>
 
         <form method="post">
-            <div style="display:none;">
-                <input type="text" name="website" tabindex="-1" autocomplete="off">
-            </div>
-            <input type="text" name="name" placeholder="Ваше имя">
-            <textarea name="text" rows="4" placeholder="Напишите ваш отзыв..." required></textarea>
-            
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
+            <label>Ваше имя:</label>
+            <input type="text" name="author" placeholder="Как вас зовут?" required>
 
-            <button type="submit">Опубликовать</button>
+            <label>Ваш отзыв:</label>
+            <textarea name="content" rows="4" placeholder="Поделитесь впечатлениями о рецептах..." required></textarea>
+
+            <button type="submit" class="btn-submit">Оставить отзыв</button>
         </form>
 
-        <div style="margin-top: 40px;">
-            {% for review in reviews %}
-                <div style="margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: right;">
-                    <form action="/delete-review/{{ loop.index0 }}" method="POST" style="display: inline-block;">
-                        <input type="password" name="admin_pass" placeholder="Пароль" 
-                            style="width: 80px; padding: 5px; font-size: 12px; margin: 0; border: 1px solid #ccc;">
-                        <button type="submit" 
-                                style="width: auto; padding: 5px 10px; background: #ff4757; font-size: 12px; margin: 0; display: inline-block;">
-                            Удалить
-                        </button>
-                    </form>
-                </div>
-                <div class="review-card">
-                    <div class="review-header">
-                        <span class="review-name">{{ review.name }}</span>
-                        <span>{{ review.date }}</span>
+        <div class="results-area">
+            {% if reviews %}
+                <h2 style="margin-top: 30px;">Что говорят другие:</h2>
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <span class="review-author">👤 {{ review.author }}</span>
+                        <p class="review-text">{{ review.content }}</p>
                     </div>
-                    <p style="margin-top: 10px; line-height: 1.4; color: #444;">{{ review.text }}</p>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; margin-top: 30px; color: #b2bec3;">Пока отзывов нет. Будьте первым!</p>
+            {% endif %}
         </div>
     </div>
 
 </body>
 </html>
-
