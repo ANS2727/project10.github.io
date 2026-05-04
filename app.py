@@ -653,6 +653,7 @@ def reviews_page():
 @app.route("/delete-review/<int:index>", methods=["POST"])
 def delete_review(index):
     password = request.form.get("admin_pass")
+    
     if password == ADMIN_PASSWORD:
         reviews = load_data(REVIEWS_FILE)
         if 0 <= index < len(reviews):

@@ -158,11 +158,29 @@
             {% if reviews %}
                 <h2 style="margin-top: 30px;">Что говорят другие:</h2>
                 {% for review in reviews %}
-                    <div class="review-card">
-                        <span class="review-author">👤 {{ review.author }}</span>
-                        <p class="review-text">{{ review.content }}</p>
-                    </div>
+                <div class="review-item">
+                    <p><strong>{{ review.author }}</strong> ({{ review.date }})</p>
+                    <p>{{ review.content }}</p>
+                    
+
+                    <form action="{{ url_for('delete_review', index=loop.index0) }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="admin_pass" id="pass_{{ loop.index0 }}">
+                        <button type="submit" onclick="return confirmDelete('{{ loop.index0 }}')">Удалить</button>
+                    </form>
+                </div>
+                <hr>
                 {% endfor %}
+                <script>
+                function confirmDelete(index) {
+                    var password = prompt("Введите пароль администратора для удаления:");
+                    if (password === null || password === "") {
+                        return false; 
+                    }
+
+                    document.getElementById('pass_' + index).value = password;
+                    return true; 
+                }
+                </script>
             {% else %}
                 <p style="text-align: center; margin-top: 30px; color: #b2bec3;">Пока отзывов нет. Будьте первым!</p>
             {% endif %}
