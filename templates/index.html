@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Подбор рецептов</title>
     <style>
         body {
@@ -22,12 +23,28 @@
         .container {
             width: 100%;
             max-width: 700px;
-            margin: 40px 20px;
+            margin: 20px;
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+                border-radius: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .btn-submit {
+                font-size: 16px;
+                padding: 12px;
+            }
         }
 
         .nav-link {
@@ -78,6 +95,7 @@
             background-color: white;
             font-size: 16px;
             cursor: pointer;
+            box-sizing: border-box;
         }
 
         .btn-submit {
@@ -133,7 +151,7 @@
             <a href="/reviews">💬 Отзывы</a>
         </div>
         
-        <h1>👨‍🍳 Подбор рецептов</h1>
+        <h1>Подбор рецептов</h1>
 
         <form method="post">
             <label id="input-label">Ваши продукты:</label>
@@ -154,7 +172,7 @@
                 {% for recipe in results %}
                     <div class="recipe">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="margin: 0;">{{ recipe.name }}</h3>
+                            <h3 style="margin: 0; font-size: 1.1em;">{{ recipe.name }}</h3>
                             <span class="percent">{{ recipe.percent }}%</span>
                         </div>
                         {% if recipe.missing %}
@@ -185,7 +203,11 @@
             }
         }
 
-        modeSelect.addEventListener('change', updateUI);
+        modeSelect.addEventListener('change', () => {
+            searchInput.value = ''; 
+            updateUI();
+        });
+
         updateUI();
     </script>
 </body>
