@@ -590,31 +590,36 @@ def index():
         if user_input:
             if mode == "name":
                 for recipe in recipes:
-                    if user_input.lower() in recipe["name"].lower():
-                        results.append({
-                            "name": recipe["name"],
-                            "percent": 100,
-                            "missing": [],
-                            "instructions": recipe["instructions"]
-                        })
-            else:
-                user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()]
-                for recipe in recipes:
-                    recipe_ings = recipe.get("ingredients", [])
-                    matches = [ri for ri in recipe_ings if any(is_match(ui, ri) for ui in user_ingredients)]
+                    query = user_input.lower().strip()
+
+                    for recipe in recipes:
+                        name = (recipe.get("name") or "").lower()
+
+                        if query in name:
+                            results.append({
+                                "name": recipe["name"],
+                                "percent": 100,
+                                "missing": [],
+                                "instructions": recipe["instructions"]
+                            })
+                else:
+                    user_ingredients = [i.strip() for i in user_input.split(",") if i.strip()]
+                    for recipe in recipes:
+                        recipe_ings = recipe.get("ingredients", [])
+                        matches = [ri for ri in recipe_ings if any(is_match(ui, ri) for ui in user_ingredients)]
                     
-                    if matches:
-                        percent = int(len(matches) / len(recipe_ings) * 100)
-                        missing = [ri for ri in recipe_ings if ri not in matches]
-                        results.append({
+                        if matches:
+                            percent = int(len(matches) / len(recipe_ings) * 100)
+                            missing = [ri for ri in recipe_ings if ri not in matches]
+                            results.append({
                             "name": recipe["name"],
                             "percent": percent,
                             "missing": missing,
                             "instructions": recipe["instructions"]
                         })
-                results.sort(key=lambda x: x["percent"], reverse=True)
+                    results.sort(key=lambda x: x["percent"], reverse=True)
 
-    return render_template("index.html", results=results, user_input=user_input, mode=mode)
+        return render_template("index.html", results=results, user_input=user_input, mode=mode)
 
 @app.route("/reviews", methods=["GET", "POST"])
 def reviews_page():
